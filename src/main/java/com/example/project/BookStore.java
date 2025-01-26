@@ -1,31 +1,129 @@
 package com.example.project;
 
-public class BookStore{
+public class BookStore {
+    private Book[] books = new Book[0]; // Dynamic resizing would be better with ArrayList
+    private User[] users = new User[10]; // Predefined maximum of 10 users
 
-    //requires at least 2 attributes Book[] books, User[] users (initialized to an empty array of 10 max users) 
+    // Empty constructor
+    public BookStore() {}
 
-    //requires 1 empty constructor
+    public User[] getUsers() {
+        return users;
+    }
 
-    // public getUsers(){}
+    public void setUsers(User[] users) {
+        this.users = users;
+    }
 
-    // public setUsers(){}
+    public Book[] getBooks() {
+        return books;
+    }
 
-    // public  getBooks(){}
+    // Adds a user to the store
+    public void addUser(User user) {
+        for (int i = 0; i < users.length; i++) {
+            if (users[i] == null) {
+                users[i] = user; // Add user to the first available spot
+                consolidateUsers(); // Ensure array remains compact
+                return;
+            }
+        }
+    }
 
-    // public void addUser(User user){} 
+    // Removes a user from the store
+    public void removeUser(User user) {
+        for (int i = 0; i < users.length; i++) {
+            if (users[i] == user) { // Compare by reference; consider overriding equals in User class
+                users[i] = null;
+                consolidateUsers();
+                return;
+            }
+        }
+    }
 
-    // public void removeUser(User user){}
+    // Rearranges the user array to remove null gaps
+    public void consolidateUsers() {
+        int nextEmpty = 0;
+        for (int i = 0; i < users.length; i++) {
+            if (users[i] != null) {
+                if (i != nextEmpty) {
+                    users[nextEmpty] = users[i];
+                    users[i] = null;
+                }
+                nextEmpty++;
+            }
+        }
+    }
 
-    // public void consolidateUsers(){}
+    // Adds a book to the inventory
+    public void addBook(Book book) {
+        int newLength = books.length + 1;
+        Book[] newBooks = new Book[newLength];
+        for (int i = 0; i < books.length; i++) {
+            newBooks[i] = books[i];
+        }
+        newBooks[newLength - 1] = book; // Add the new book at the end
+        books = newBooks;
+    }
 
-    // public void addBook(Book book){}
+    // Inserts a book at a specific index
+    public void insertBook(Book book, int index) {
+        if (index < 0 || index > books.length) {
+            throw new IndexOutOfBoundsException("Invalid index");
+        }
+        Book[] newBooks = new Book[books.length + 1];
+        for (int i = 0; i < index; i++) {
+            newBooks[i] = books[i];
+        }
+        for (int i = index + 1; i < newBooks.length; i++) {
+            newBooks[i] = books[i - 1];
+        }
+        newBooks[index] = book;
+        books = newBooks;
+    }
 
-    // public void insertBook(Book book, int index){}
+    // Removes a book from the inventory
+    public void removeBook(Book book) {
+        int index = -1;
+        for (int i = 0; i < books.length; i++) {
+            if (books[i] == book) {
+                index = i; // Find the index of the book
+                break;
+            }
+        }
+        if (index == -1) return; // Book not found
 
-    // public void removeBook(Book book){}
-       
-    // public String bookStoreBookInfo(){} //you are not tested on this method but use it for debugging purposes
+        if (books[index].getQuantity() == 1) {
+            Book[] newList = new Book[books.length - 1];
+            for (int i = 0; i < index; i++) {
+                newList[i] = books[i];
+            }
+            for (int i = index + 1; i < books.length; i++) {
+                newList[i - 1] = books[i];
+            }
+            books = newList;
+        } else {
+            books[index].setQuantity(books[index].getQuantity() - 1); // Decrement quantity if more than 1
+        }
+    }
 
-    // public String bookStoreUserInfo(){} //you are not tested on this method but use it for debugging purposes
+    // Debugging helper for book info
+    public String bookStoreBookInfo() {
+        String result = "";
+        for (Book book : books) {
+            result += book.bookInfo() + "\n";
+        }
+        return result;
+    }
 
+    // Debugging helper for user info
+    public String bookStoreUserInfo() {
+        String result = "";
+        for (User user : users) {
+            if (user != null) {
+                result += user.userInfo() + "\n";
+            }
+        }
+        return result;
+    }
 }
